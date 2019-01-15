@@ -68,7 +68,7 @@ f1t=slim.conv2d(
 f1t=f1t+feature1
 #with tf.variable_scope('f2t') as sc:
 f2t=slim.conv2d(
-    tf.padding(feature2,[0,1,1,0],mode="CONSTANT", name='pad', constant_values=1),
+    tf.padding(feature2,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
     512,
     [3,3],
     stride=1,
@@ -78,7 +78,7 @@ f2t=slim.conv2d(
 )
 f2t=slim.conv2d(f2t, 512, [3, 3], stride=1, padding='SAME', scope='conv2', activation_fn=tf.nn.relu)
 f2t=slim.conv2d(
-    tf.padding(f2t,[0,1,1,0],mode="CONSTANT", name='pad', constant_values=1),
+    tf.padding(f2t,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
     512,
     [3,3],
     stride=1,
@@ -89,7 +89,7 @@ f2t=slim.conv2d(
 f2t=f2t+feature2
 #with tf.variable_scope('f3t') as sc:
 f3t=slim.conv2d(
-    tf.padding(feature3,[0,1,1,0],mode="CONSTANT", name='pad', constant_values=1),
+    tf.padding(feature3,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
     512,
     [3,3],
     stride=1,
@@ -99,7 +99,7 @@ f3t=slim.conv2d(
 )
 f3t=slim.conv2d(f3t, 512, [3, 3], stride=1, padding='SAME', scope='conv2', activation_fn=tf.nn.relu)
 f3t=slim.conv2d(
-    tf.padding(f3t,[0,1,1,0],mode="CONSTANT", name='pad', constant_values=1),
+    tf.padding(f3t,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
     512,
     [3,3],
     stride=1,
