@@ -47,7 +47,7 @@ feature3 = slim.conv2d(feature3, 512, [3, 3], stride=1, padding='SAME', scope='c
 
 #with tf.variable_scope('f1t') as sc:
 f1t=slim.conv2d(
-    tf.padding(feature1,[0,1,1,0],mode="CONSTANT", name='pad', constant_values=1),
+    tf.pad(feature1,[0,1,1,0],mode="CONSTANT", name='pad', constant_values=1),
     256,
     [3,3],
     stride=1,
