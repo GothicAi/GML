@@ -33,7 +33,7 @@ class Decoder(object):
             return (kernel, bias)
     
 
-    def decode(self, image):
+    def decode(self, image,using_facelet=None,f1=None,f2=None,f3=None):
         # upsampling after 'conv4_1', 'conv3_1', 'conv2_1'
         upsample_indices = (0, 4, 6)
         final_layer_idx  = len(self.weight_vars) - 1
@@ -41,11 +41,22 @@ class Decoder(object):
         out = image
         for i in range(len(self.weight_vars)):
             kernel, bias = self.weight_vars[i]
-
-            if i == final_layer_idx:
-                out = conv2d(out, kernel, bias, use_relu=False)
+            if using_facelet:
+                if i==3:#f1的index，待修改
+                    out = conv2d(out, kernel, bias) + f1
+                elif i == 4:  # f2的index，待修改
+                    out = conv2d(out, kernel, bias) + f2
+                elif i == 5:  # f3的index，待修改
+                    out = conv2d(out, kernel, bias) + f3
+                elif i == final_layer_idx:
+                    out = conv2d(out, kernel, bias, use_relu=False)
+                else:
+                    out = conv2d(out, kernel, bias)
             else:
-                out = conv2d(out, kernel, bias)
+                if i == final_layer_idx:
+                    out = conv2d(out, kernel, bias, use_relu=False)
+                else:
+                    out = conv2d(out, kernel, bias)
             
             if i in upsample_indices:
                 out = upsample(out)
