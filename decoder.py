@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-
+slim = tf.contrib.slim
 class Decoder(object):
 
     def __init__(self):
@@ -31,61 +31,61 @@ class Decoder(object):
             bias = tf.get_variable(initializer=tf.contrib.layers.xavier_initializer(uniform=False), shape=[output_filters], name='bias')
             return (kernel, bias)
 
-    def batchnorm_(input,is_training):
+    def _batchnorm(self,input,is_training):
         with tf.variable_scope("batchnorm"):
             # this block looks like it has 3 inputs on the graph unless we do this
-            input = tf.identity(input)
             if is_training:
-                normalized = tf.contrib.layers.batch_norm(input, decay=0.99, center=True, scale=True, epsilon=0.001,
+                normalized = slim.batch_norm(input, decay=0.99, center=True, scale=True, epsilon=0.001,
                                                           is_training=True, fused=True, scope='bn')
             else:
-                normalized = tf.contrib.layers.batch_norm(input, decay=0.99, center=True, scale=True, epsilon=0.001,
+                normalized = slim.batch_norm(input, decay=0.99, center=True, scale=True, epsilon=0.001,
                                                           is_training=False, fused=True, scope='bn')
             return normalized
 
-    def decode(self, image,using_facelet=False,f1=None,f2=None,f3=None):
+    def decode(self, image,using_facelet=False,f1=None,f2=None,f3=None,is_training=False):
         # upsampling after 'conv4_1', 'conv3_1', 'conv2_1'
         upsample_indices = (0, 4, 8,10)
         final_layer_idx  = len(self.weight_vars) - 1
 
         out = image
         for i in range(len(self.weight_vars)):
+            print(out.shape)
             kernel, bias = self.weight_vars[i]
             if using_facelet:
                 if i==3:#f1的index，待修改
-                    out = conv2d(out, kernel, bias) + f1
+                    out = self._conv2d(out, kernel, bias,is_training) + f1
                 elif i == 4:  # f2的index，待修改
-                    out = conv2d(out, kernel, bias) + f2
+                    out = self._conv2d(out, kernel, bias,is_training) + f2
                 elif i == 5:  # f3的index，待修改
-                    out = conv2d(out, kernel, bias) + f3
+                    out = self._conv2d(out, kernel, bias,is_training) + f3
                 elif i == final_layer_idx:
-                    out = conv2d(out, kernel, bias, use_relu=False)
+                    out = self._conv2d(out, kernel, bias,is_training,use_relu=False)
                 else:
-                    out = conv2d(out, kernel, bias)
+                    out = self._conv2d(out, kernel, bias,is_training)
             else:
                 if i == final_layer_idx:
-                    out = conv2d(out, kernel, bias, use_relu=False)
+                    out = self._conv2d(out, kernel, bias,is_training, use_relu=False)
                 else:
-                    out = conv2d(out, kernel, bias)
+                    out = self._conv2d(out, kernel, bias,is_training)
             
             if i in upsample_indices:
                 out = upsample(out)
 
         return out
-def batchnorm()
+    def _conv2d(self,x, kernel, bias, is_training,use_relu=True):
+        name=kernel.name.split('/')[-2]
+        with tf.variable_scope(name):
+            # padding image with reflection mode
+            x_padded = tf.pad(x, [[0, 0], [1, 1], [1, 1], [0, 0]], mode='REFLECT')
 
-def conv2d(x, kernel, bias, use_relu=True):
-    # padding image with reflection mode
-    x_padded = tf.pad(x, [[0, 0], [1, 1], [1, 1], [0, 0]], mode='REFLECT')
+            # conv and add bias
+            out = tf.nn.conv2d(x_padded, kernel, strides=[1, 1, 1, 1], padding='VALID')
+            out = tf.nn.bias_add(out, bias)
+            out= self._batchnorm(out,is_training)
+            if use_relu:
+                out = tf.nn.relu(out)
 
-    # conv and add bias
-    out = tf.nn.conv2d(x_padded, kernel, strides=[1, 1, 1, 1], padding='VALID')
-    out = tf.nn.bias_add(out, bias)
-
-    if use_relu:
-        out = tf.nn.relu(out)
-
-    return out
+            return out
 
 
 def upsample(x, scale=2):
@@ -94,11 +94,18 @@ def upsample(x, scale=2):
     output = tf.image.resize_images(x, [height, width], 
         method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
     return output
+
 a=Decoder()
 f3=tf.placeholder(shape=[1,16,16,512],dtype=tf.float32)
+
+update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+with tf.control_dependencies(update_ops):
+    xm=a.decode(f3)
+
 with tf.Session() as sess:
     sess.run(tf.initialize_all_variables())
-    t=sess.run(a.decode(f3),feed_dict={f3:np.zeros(shape=[1,16,16,512])})
+    sess.run(tf.local_variables_initializer())
+    t=sess.run(xm,feed_dict={f3:np.zeros(shape=[1,16,16,512])})
     print(t.shape)
 
 '''
