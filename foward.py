@@ -173,7 +173,7 @@ with tf.Session() as sess:
     #print(a.shape)
     print(b.shape)
     print(c.shape)
-    saver.save(sess,save_path="./")
+    saver.save(sess,save_path="model/")
     tf.train.write_graph(sess.graph_def, 'model/', 'model.pb')
     tf.summary.FileWriter("./log", tf.get_default_graph())
 
