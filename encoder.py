@@ -10,7 +10,7 @@ ENCODER_LAYERS = (
     'conv3_1', 'relu3_1', 'conv3_2', 'relu3_2', 'conv3_3',
     'relu3_3', 'conv3_4', 'relu3_4', 'pool3',
 
-    'conv4_1', 'relu4_1', , 'conv4_2', 'relu4_2', 'conv4_3',
+    'conv4_1', 'relu4_1', 'conv4_2', 'relu4_2', 'conv4_3',
     'relu4_3', 'conv4_4', 'relu4_4', 'pool4',
  
     'conv5_1', 'relu5_1'
@@ -98,3 +98,12 @@ def conv2d(x, kernel, bias):
 
 def pool2d(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+
+'''
+a=Encoder('model/vgg19_normalised.npz')
+image=tf.placeholder(shape=[1,256,256,3],dtype=tf.float32)
+with tf.Session() as sess:
+    sess.run(tf.initialize_all_variables())
+    t,_=sess.run(a.encode(image),feed_dict={image:np.zeros(shape=[1,256,256,3])})
+    print(t.shape)
+'''

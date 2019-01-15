@@ -24,18 +24,23 @@ with tf.variable_scope('feature1') as sc:
     feature1= slim.conv2d(feature1, 128, [3, 3], stride=1, padding='SAME', scope='conv2_2',activation_fn=tf.nn.relu)
     feature1 = slim.max_pool2d(feature1, [2, 2], scope='pool2')
     feature1 = slim.conv2d(feature1, 256, [3, 3], stride=1, padding='SAME', scope='conv3_1',activation_fn=tf.nn.relu)
+    f1_train=tf.reduce_mean(feature1,axis=0)
+
 with tf.variable_scope('feature2') as sc:
     feature2 = slim.conv2d(feature1, 256, [3, 3], stride=1, padding='SAME', scope='conv3_2',activation_fn=tf.nn.relu)
     feature2 = slim.conv2d(feature2, 256, [3, 3], stride=1, padding='SAME', scope='conv3_3',activation_fn=tf.nn.relu)
     feature2 = slim.conv2d(feature2, 256, [3, 3], stride=1, padding='SAME', scope='conv3_4',activation_fn=tf.nn.relu)
     feature2 = slim.max_pool2d(feature2, [2, 2], scope='pool3')
     feature2 = slim.conv2d(feature2, 512, [3, 3], stride=1, padding='SAME', scope='conv4_1',activation_fn=tf.nn.relu)
+    f2_train = tf.reduce_mean(feature2, axis=0)
+
 with tf.variable_scope('feature3') as sc:
     feature3 = slim.conv2d(feature2, 512, [3, 3], stride=1, padding='SAME', scope='conv4_2', activation_fn=tf.nn.relu)
     feature3 = slim.conv2d(feature3, 512, [3, 3], stride=1, padding='SAME', scope='conv4_3', activation_fn=tf.nn.relu)
     feature3 = slim.conv2d(feature3, 512, [3, 3], stride=1, padding='SAME', scope='conv4_4', activation_fn=tf.nn.relu)
     feature3 = slim.max_pool2d(feature3, [2, 2], scope='pool4')
     feature3 = slim.conv2d(feature3, 512, [3, 3], stride=1, padding='SAME', scope='conv5_1', activation_fn=tf.nn.relu)
+    f3_train = tf.reduce_mean(feature3, axis=0)
 
 with tf.variable_scope('f1t') as sc:
     f1t=slim.conv2d(
@@ -154,14 +159,14 @@ with tf.variable_scope('recon1') as sc:
 with tf.variable_scope('recon0') as sc:
     net=slim.conv2d(net, 3, [3, 3], stride=1, padding='SAME', scope='conv', activation_fn=None)
 
-out = tf.Variable(net, name='final')
+print('network defined')
 
 #slim.losses.softmax_cross_entropy(predictions, label)
 #total_loss = slim.losses.get_total_loss()
 # create_train_op ensures that each time we ask for the loss, the update_ops
 # are run and the gradients being computed are applied too.
 #train_op = slim.learning.create_train_op(total_loss, optimizer)
-print('1')
+
 init_op=tf.global_variables_initializer()
 saver = tf.train.Saver(max_to_keep=4)
 #创建session
@@ -169,10 +174,11 @@ with tf.Session() as sess:
     # 变量初始化
     sess.run(init_op,feed_dict={image:np.zeros([1,256,256,3],dtype=np.float32)})
     #print('1')
-    a,b,c=sess.run([f1t,f2t,net],feed_dict={image:np.zeros([1,256,256,3],dtype=np.float32)})
-    #print(a.shape)
-    print(b.shape)
-    print(c.shape)
+    f1a,f2a,f3a=sess.run([f1_train,f2_train,f3_train],feed_dict={image:np.zeros([1,256,256,3],dtype=np.float32)})
+    f1b,f2b,f3b=sess.run([f1_train, f2_train, f3_train],feed_dict={image: np.zeros([1, 256, 256, 3], dtype=np.float32)})
+    print(f1a.shape)
+    print(f2a.shape)
+    print(f3a.shape)
     saver.save(sess,save_path="model/model")
     tf.train.write_graph(sess.graph_def, 'model/', 'model.pb')
     tf.summary.FileWriter("./log", tf.get_default_graph())

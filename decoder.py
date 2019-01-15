@@ -1,11 +1,10 @@
 import tensorflow as tf
-
+import numpy as np
 
 class Decoder(object):
 
     def __init__(self):
         self.weight_vars = []
-
         with tf.variable_scope('decoder'):
             self.weight_vars.append(self._create_variables(512, 512, 3, scope='conv5_1'))
             
@@ -31,11 +30,22 @@ class Decoder(object):
             kernel = tf.get_variable(initializer=tf.contrib.layers.xavier_initializer(uniform=False), shape=shape, name='kernel')
             bias = tf.get_variable(initializer=tf.contrib.layers.xavier_initializer(uniform=False), shape=[output_filters], name='bias')
             return (kernel, bias)
-    
 
-    def decode(self, image,using_facelet=None,f1=None,f2=None,f3=None):
+    def batchnorm_(input,is_training):
+        with tf.variable_scope("batchnorm"):
+            # this block looks like it has 3 inputs on the graph unless we do this
+            input = tf.identity(input)
+            if is_training:
+                normalized = tf.contrib.layers.batch_norm(input, decay=0.99, center=True, scale=True, epsilon=0.001,
+                                                          is_training=True, fused=True, scope='bn')
+            else:
+                normalized = tf.contrib.layers.batch_norm(input, decay=0.99, center=True, scale=True, epsilon=0.001,
+                                                          is_training=False, fused=True, scope='bn')
+            return normalized
+
+    def decode(self, image,using_facelet=False,f1=None,f2=None,f3=None):
         # upsampling after 'conv4_1', 'conv3_1', 'conv2_1'
-        upsample_indices = (0, 4, 6)
+        upsample_indices = (0, 4, 8,10)
         final_layer_idx  = len(self.weight_vars) - 1
 
         out = image
@@ -62,6 +72,7 @@ class Decoder(object):
                 out = upsample(out)
 
         return out
+def batchnorm()
 
 def conv2d(x, kernel, bias, use_relu=True):
     # padding image with reflection mode
@@ -83,6 +94,12 @@ def upsample(x, scale=2):
     output = tf.image.resize_images(x, [height, width], 
         method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
     return output
+a=Decoder()
+f3=tf.placeholder(shape=[1,16,16,512],dtype=tf.float32)
+with tf.Session() as sess:
+    sess.run(tf.initialize_all_variables())
+    t=sess.run(a.decode(f3),feed_dict={f3:np.zeros(shape=[1,16,16,512])})
+    print(t.shape)
 
 '''
     def decode(self, image):
