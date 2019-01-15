@@ -2,7 +2,6 @@
 # coding: utf-8
 
 # In[1]:
-
 import tensorflow as tf
 import numpy as np
 import tensorflow.contrib.slim.nets as nets
@@ -68,7 +67,7 @@ f1t=slim.conv2d(
 f1t=f1t+feature1
 #with tf.variable_scope('f2t') as sc:
 f2t=slim.conv2d(
-    tf.padding(feature2,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
+    tf.pad(feature2,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
     512,
     [3,3],
     stride=1,
@@ -78,7 +77,7 @@ f2t=slim.conv2d(
 )
 f2t=slim.conv2d(f2t, 512, [3, 3], stride=1, padding='SAME', scope='conv2', activation_fn=tf.nn.relu)
 f2t=slim.conv2d(
-    tf.padding(f2t,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
+    tf.pad(f2t,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
     512,
     [3,3],
     stride=1,
@@ -89,7 +88,7 @@ f2t=slim.conv2d(
 f2t=f2t+feature2
 #with tf.variable_scope('f3t') as sc:
 f3t=slim.conv2d(
-    tf.padding(feature3,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
+    tf.pad(feature3,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
     512,
     [3,3],
     stride=1,
@@ -123,5 +122,6 @@ saver = tf.train.Saver(max_to_keep=4)
 with tf.Session() as sess:
     # 变量初始化
     sess.run(init_op)
+    print('1')
     sess.run(f1t,feed_dict={image:np.zeros([1,256,256,3])})
     
