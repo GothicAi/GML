@@ -49,14 +49,14 @@ class Decoder(object):
 
         out = image
         for i in range(len(self.weight_vars)):
-            print(out.shape)
+            #print(out.shape)
             kernel, bias = self.weight_vars[i]
             if using_facelet:
-                if i==3:#f1的index，待修改
+                if i==3:#f1 index
                     out = self._conv2d(out, kernel, bias,is_training) + f1
-                elif i == 4:  # f2的index，待修改
+                elif i == 4:  # f2 index
                     out = self._conv2d(out, kernel, bias,is_training) + f2
-                elif i == 5:  # f3的index，待修改
+                elif i == 5:  # f3 index
                     out = self._conv2d(out, kernel, bias,is_training) + f3
                 elif i == final_layer_idx:
                     out = self._conv2d(out, kernel, bias,is_training,use_relu=False)
@@ -94,7 +94,7 @@ def upsample(x, scale=2):
     output = tf.image.resize_images(x, [height, width], 
         method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
     return output
-
+'''
 a=Decoder()
 f3=tf.placeholder(shape=[1,16,16,512],dtype=tf.float32)
 
@@ -107,6 +107,7 @@ with tf.Session() as sess:
     sess.run(tf.local_variables_initializer())
     t=sess.run(xm,feed_dict={f3:np.zeros(shape=[1,16,16,512])})
     print(t.shape)
+'''
 
 '''
     def decode(self, image):
