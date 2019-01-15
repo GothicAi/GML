@@ -12,7 +12,7 @@ import tensorflow.contrib.slim.nets as nets
 
 slim = tf.contrib.slim
 
-image=tf.placeholder(shape=[1,256,256,3],dtype=tf.float32)
+image=tf.placeholder(shape=[1,256,256,3],dtype=tf.float32,name='start')
 
 g = tf.Graph()
 
@@ -153,24 +153,28 @@ with tf.variable_scope('recon1') as sc:
 
 with tf.variable_scope('recon0') as sc:
     net=slim.conv2d(net, 3, [3, 3], stride=1, padding='SAME', scope='conv', activation_fn=None)
+
+out = tf.Variable(net, name='final')
+
 #slim.losses.softmax_cross_entropy(predictions, label)
 #total_loss = slim.losses.get_total_loss()
 # create_train_op ensures that each time we ask for the loss, the update_ops
 # are run and the gradients being computed are applied too.
 #train_op = slim.learning.create_train_op(total_loss, optimizer)
 print('1')
-init_op=tf.initialize_all_variables()
+init_op=tf.global_variables_initializer()
 saver = tf.train.Saver(max_to_keep=4)
 #创建session
 with tf.Session() as sess:
     # 变量初始化
-    sess.run(init_op)
+    sess.run(init_op,feed_dict={image:np.zeros([1,256,256,3],dtype=np.float32)})
     #print('1')
-    a,b,c=sess.run([f1t,f2t,net],feed_dict={image:np.zeros([1,256,256,3])})
+    a,b,c=sess.run([f1t,f2t,net],feed_dict={image:np.zeros([1,256,256,3],dtype=np.float32)})
     #print(a.shape)
     print(b.shape)
-    print(net.shape)
+    print(c.shape)
     saver.save(sess,save_path="./")
+    tf.train.write_graph(sess.graph_def, 'model/', 'model.pb')
     tf.summary.FileWriter("./log", tf.get_default_graph())
 
 
