@@ -9,7 +9,7 @@ from utils import list_images
 is_training = True
 
 # for training
-TRAINING_CONTENT_DIR = 'MS_COCO'
+TRAINING_CONTENT_DIR = 'source'
 ENCODER_WEIGHTS_PATH = 'vgg19_normalised.npz'
 LOGGING_PERIOD = 20
 feature_weight = 1

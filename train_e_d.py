@@ -114,7 +114,7 @@ def train_e_d(content_imgs_path, feature_weight, encoder_path, model_save_path, 
 
                 if step % 1000 == 0:
                     saver.save(sess, model_save_path, global_step=step, write_meta_graph=False)
-                    print(loss_log1,loss_log2)
+                print(loss_log1,loss_log2)
             '''
             imgnames = tf.constant(content_imgs_path)
             dataset = tf.data.Dataset.from_tensor_slices(imgnames)
@@ -137,6 +137,6 @@ def train_e_d(content_imgs_path, feature_weight, encoder_path, model_save_path, 
         #    print('Error message: %s' % str(ex))
 
         ###### Done Training & Save the model ######
-        saver.save(sess, model_save_path)
+        saver.save(sess, model_save_path[0])
 
 #            saver.save(sess, model_save_path)
