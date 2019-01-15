@@ -18,7 +18,7 @@ def list_images(directory):
     return images
 
 
-def get_train_images(paths, resize_len=286, crop_height=256, crop_width=256):
+def get_train_images(paths, resize_len=512, crop_height=256, crop_width=256):
     images = []
     for path in paths:
         image = imread(path, mode='RGB')
@@ -63,9 +63,9 @@ def get_images(paths, height=None, width=None):
     return images
 
 
-def save_images(datas, contents_path, styles_path, save_dir, suffix=None):
+def save_images(datas, contents_path, save_dir, suffix=None):
 
-    assert(len(datas) == len(contents_path) * len(styles_path))
+    assert(len(datas) == len(contents_path))
 
     if not exists(save_dir):
         mkdir(save_dir)
@@ -75,17 +75,13 @@ def save_images(datas, contents_path, styles_path, save_dir, suffix=None):
 
     data_idx = 0
     for content_path in contents_path:
-        for style_path in styles_path:
-            data = datas[data_idx]
-            data_idx += 1
+        data = datas[data_idx]
+        data_idx += 1
 
-            content_path_name, content_ext = splitext(content_path)
-            style_path_name, style_ext = splitext(style_path)
+        content_path_name, content_ext = splitext(content_path)
 
-            content_name = content_path_name.split(sep)[-1]
-            style_name = style_path_name.split(sep)[-1]
+        content_name = content_path_name.split(sep)[-1]
             
-            save_path = join(save_dir, '%s-%s%s%s' % 
-                (content_name, style_name, suffix, content_ext))
+        save_path = join(save_dir, '%s-%s%s' % (content_name, suffix, content_ext))
 
-            imsave(save_path, data)
+        imsave(save_path, data)

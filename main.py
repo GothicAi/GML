@@ -2,6 +2,7 @@ from __future__ import print_function
 
 from train_e_d import train_e_d
 from utils import list_images
+from infer import stylize
 #import tensorflow.contrib.eager as tfe
 
 #tfe.enable_eager_execution()
@@ -18,7 +19,7 @@ MODEL_SAVE_PATHS = [
 ]
 
 # for inferring (stylize)
-INFERRING_CONTENT_DIR = 'images/content'
+INFERRING_CONTENT_DIR = 'source'
 OUTPUTS_DIR = 'outputs'
 
 
@@ -34,11 +35,9 @@ def main():
 
     else:
 
-        #content_imgs_path = list_images(INFERRING_CONTENT_DIR)
+        content_imgs_path = list_images(INFERRING_CONTENT_DIR)
 
-            #stylize(content_imgs_path, style_imgs_path, OUTPUTS_DIR, 
-             #       ENCODER_WEIGHTS_PATH, model_save_path, 
-             #       suffix='-' + str(style_weight))
+        stylize(content_imgs_path, OUTPUTS_DIR, ENCODER_WEIGHTS_PATH, model_save_path, suffix=None))
 
         print('\n>>> Successfully! Done all stylizing...\n')
 
