@@ -2,26 +2,18 @@
 # coding: utf-8
 
 # In[1]:
+
 import tensorflow as tf
+
+print(1)
 import numpy as np
 import tensorflow.contrib.slim.nets as nets
 
-from tensorflow.examples.tutorials.mnist import input_data
-
 slim = tf.contrib.slim
-vgg = nets.vgg
-
-# 超参数
-learning_rate = 0.5
-epochs = 12
-batch_size = 10
 
 image=tf.placeholder(shape=[1,256,256,3],dtype=tf.float32)
 
 g = tf.Graph()
-
-# Create the model and specify the losses...
-optimizer = tf.train.GradientDescentOptimizer(learning_rate)
 
 #with tf.variable_scope('feature1') as sc:
 feature1 = slim.conv2d(image, 64, [3, 3], stride=1, padding='SAME', scope='conv1_1',activation_fn=tf.nn.relu)
@@ -46,7 +38,7 @@ feature3 = slim.conv2d(feature3, 512, [3, 3], stride=1, padding='SAME', scope='c
 
 #with tf.variable_scope('f1t') as sc:
 f1t=slim.conv2d(
-    tf.pad(feature1,[0,1,1,0],mode="CONSTANT", name='pad', constant_values=1),
+    tf.pad(feature1,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
     256,
     [3,3],
     stride=1,
@@ -56,7 +48,7 @@ f1t=slim.conv2d(
 )
 f1t=slim.conv2d(f1t, 256, [3, 3], stride=1, padding='SAME', scope='conv2', activation_fn=tf.nn.relu)
 f1t=slim.conv2d(
-    tf.padding(f1t,[0,1,1,0],mode="CONSTANT", name='pad', constant_values=1),
+    tf.padding(f1t,[[0,0],[1,1],[1,1],[0,0]],mode="CONSTANT", name='pad', constant_values=1),
     256,
     [3,3],
     stride=1,
@@ -108,14 +100,12 @@ f3t=slim.conv2d(
 )
 f3t=f3t+feature3
 
-
 #slim.losses.softmax_cross_entropy(predictions, label)
 #total_loss = slim.losses.get_total_loss()
-
 # create_train_op ensures that each time we ask for the loss, the update_ops
 # are run and the gradients being computed are applied too.
 #train_op = slim.learning.create_train_op(total_loss, optimizer)
-
+print('1')
 init_op=tf.initialize_all_variables()
 saver = tf.train.Saver(max_to_keep=4)
 #创建session
