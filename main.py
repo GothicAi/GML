@@ -10,10 +10,10 @@ from infer import stylize
 is_training = True
 
 # for training
-TRAINING_CONTENT_DIR = 'source'
+TRAINING_CONTENT_DIR = 'celebA/train'
 ENCODER_WEIGHTS_PATH = 'vgg19_normalised.npz'
 LOGGING_PERIOD = 20
-feature_weight = 1
+feature_weight = 1000
 MODEL_SAVE_PATHS = [
     'models/style_weight_2e0.ckpt',
 ]
@@ -37,7 +37,7 @@ def main():
 
         content_imgs_path = list_images(INFERRING_CONTENT_DIR)
 
-        stylize(content_imgs_path, OUTPUTS_DIR, ENCODER_WEIGHTS_PATH, model_save_path, suffix=None))
+        stylize(content_imgs_path, OUTPUTS_DIR, ENCODER_WEIGHTS_PATH, MODEL_SAVE_PATHS, suffix=None)
 
         print('\n>>> Successfully! Done all stylizing...\n')
 
