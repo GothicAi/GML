@@ -71,7 +71,9 @@ def train_facelet(content_imgs_path, gt_path, encoder_path,model_save_path):
         ###### Start Training ######
         step = 0
         n_batches = int(len(content_imgs_path) / BATCH_SIZE)
-
+        tf.summary.scalar('loss', loss)
+        summary_writer = tf.summary.FileWriter("log", tf.get_default_graph())
+        merged = tf.summary.merge_all()
         #try:
         print('Now begin to train the model...\n')
         for epoch in range(EPOCHS):
@@ -89,11 +91,14 @@ def train_facelet(content_imgs_path, gt_path, encoder_path,model_save_path):
 
                 step += 1
                 print(step)
+                result = sess.run(merged, feed_dict={content: content_batch, gt: delta})
+                summary_writer.add_summary(result, step)
 
                 if step % 500 == 0:
                     saver.save(sess, model_save_path[0], global_step=step, write_meta_graph=False)
 
-                print(loss_num)
+
+            print(loss_num)
             '''
             imgnames = tf.constant(content_imgs_path)
             dataset = tf.data.Dataset.from_tensor_slices(imgnames)
