@@ -148,9 +148,9 @@ def train_e_d(content_imgs_path, feature_weight, encoder_path, model_save_path, 
         input_features = stn.input_features
         generate_features = stn.generate_features
 
-        pixel_loss = tf.nn.l2_loss(generated_img - content)
+        pixel_loss = tf.nn.l1_loss(generated_img - content)
 
-        feature_loss = tf.nn.l2_loss(generate_features - input_features)
+        feature_loss = tf.nn.l1_loss(generate_features - input_features)
 
         # compute the total loss
         loss = pixel_loss + feature_weight * feature_loss
