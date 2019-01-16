@@ -85,7 +85,7 @@ def train_facelet(content_imgs_path, gt_path, encoder_path,model_save_path):
                 content_batch = get_train_images(content_batch_path, crop_height=HEIGHT, crop_width=WIDTH)
                 print('run the training step')
                     # run the training step
-                _,loss = sess.run([train_op,loss], feed_dict={content: content_batch,gt:delta})
+                _,loss_num = sess.run([train_op,loss], feed_dict={content: content_batch,gt:delta})
 
                 step += 1
                 print(step)
@@ -93,7 +93,7 @@ def train_facelet(content_imgs_path, gt_path, encoder_path,model_save_path):
                 if step % 1000 == 0:
                     saver.save(sess, model_save_path[0], global_step=step, write_meta_graph=False)
 
-                print(loss)
+                print(loss_num)
             '''
             imgnames = tf.constant(content_imgs_path)
             dataset = tf.data.Dataset.from_tensor_slices(imgnames)
