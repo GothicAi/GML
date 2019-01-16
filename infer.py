@@ -28,9 +28,9 @@ def stylize(contents_path, output_dir, encoder_path, model_path, resize_height=N
 
             content_img = get_images(content_path, height=resize_height, width=resize_width)
 
-                result = sess.run(output_image, feed_dict={content: content_img})
+            result = sess.run(output_image, feed_dict={content: content_img})
 
-                outputs.append(result[0])
+            outputs.append(result[0])
 
     save_images(outputs, contents_path, output_dir, suffix=suffix)
 

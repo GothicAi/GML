@@ -37,7 +37,7 @@ def main():
 
         content_imgs_path = list_images(INFERRING_CONTENT_DIR)
 
-        stylize(content_imgs_path, OUTPUTS_DIR, ENCODER_WEIGHTS_PATH, model_save_path, suffix=None))
+        stylize(content_imgs_path, OUTPUTS_DIR, ENCODER_WEIGHTS_PATH, MODEL_SAVE_PATHS[0], suffix=None)
 
         print('\n>>> Successfully! Done all stylizing...\n')
 

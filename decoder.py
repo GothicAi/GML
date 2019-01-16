@@ -81,7 +81,7 @@ class Decoder(object):
             # conv and add bias
             out = tf.nn.conv2d(x_padded, kernel, strides=[1, 1, 1, 1], padding='VALID')
             out = tf.nn.bias_add(out, bias)
-            out= self._batchnorm(out,is_training)
+            #out= self._batchnorm(out,is_training)
             if use_relu:
                 out = tf.nn.relu(out)
 
