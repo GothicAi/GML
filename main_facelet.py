@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 from train_e_d import train_e_d
-from train_e_d import train_facelet
+from train_facelet import train_facelet
 from utils import list_images
 #import tensorflow.contrib.eager as tfe
 
