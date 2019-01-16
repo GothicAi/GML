@@ -27,6 +27,7 @@ def train_facelet(content_imgs_path, gt_path, encoder_path,model_save_path):
     INPUT_SHAPE = (BATCH_SIZE, HEIGHT, WIDTH, CHANNELS)
     source=np.load(gt_path+"beauty_source.npz")['arr_0']
     target=np.load(gt_path+"beauty_target.npz")['arr_0']
+    delta=target-source
 
     # create the graph
     with tf.Graph().as_default(), tf.Session() as sess:
@@ -58,7 +59,7 @@ def train_facelet(content_imgs_path, gt_path, encoder_path,model_save_path):
         loss = tf.nn.l2_loss(fall-gt)
         global_step = tf.Variable(0, trainable=False)
         learning_rate = tf.train.inverse_time_decay(LEARNING_RATE, global_step, DECAY_STEPS, LR_DECAY_RATE)   
-        with tf.name_scope("train_group"):
+        with tf.name_scope("train_facelet_group"):
             batchnorm_updates = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(batchnorm_updates):
                 train_op = tf.train.AdamOptimizer(learning_rate).minimize(loss, global_step=global_step)
@@ -84,7 +85,7 @@ def train_facelet(content_imgs_path, gt_path, encoder_path,model_save_path):
                 content_batch = get_train_images(content_batch_path, crop_height=HEIGHT, crop_width=WIDTH)
                 print('run the training step')
                     # run the training step
-                _,loss = sess.run([train_op,loss], feed_dict={content: content_batch,gt:target-source})
+                _,loss = sess.run([train_op,loss], feed_dict={content: content_batch,gt:delta})
 
                 step += 1
                 print(step)
