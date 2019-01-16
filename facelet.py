@@ -40,9 +40,9 @@ class facelet(object):
             else:
                 out = self._conv2d(out, kernel, bias)
         return out
-    def combine(self,input_feature):
+    def combine(self,input_feature,scale=0):
         trans=self.forward(input_feature)
-        return trans+input_feature
+        return scale*trans+input_feature
 '''
 a=facelet('feature1',128)
 f1=tf.placeholder(shape=[None,64,64,128],dtype=tf.float32)

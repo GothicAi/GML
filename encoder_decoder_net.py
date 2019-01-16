@@ -25,17 +25,47 @@ class EncoderDecoderNet(object):
         enc_c, generate_feature = self.encoder.encode(content)
         with tf.name_scope('feature1CNN'):
             feature1 = generate_feature['relu3_1']
-            f1t=self.fnet1.forward(feature1)
+            f1t=self.fnet1.combine(feature1,0)
         with tf.name_scope('feature2CNN'):
             feature2 = generate_feature['relu4_1']
-            f2t=self.fnet2.forward(feature2)
+            f2t=self.fnet2.combine(feature2,0)
         with tf.name_scope('feature3CNN'):
             feature3 = generate_feature['relu5_1']
-            f3t=self.fnet3.forward(feature3)
+            f3t=self.fnet3.combine(feature3,0.01)
+
         final_image=self.decoder.decode(f3t,True,f1t,f2t)
         final_image=self.encoder.deprocess(final_image)
+        final_image = tf.reverse(final_image, axis=[-1])
+
+        # clip to 0..255
+        final_image = tf.clip_by_value(final_image, 0.0, 255.0)
         return final_image
 
+    def decoder_with_deltaV(self,content,f1t,f2t,f3t):
+        # encoder doing something
+        # switch RGB to BGR
+        content = tf.reverse(content, axis=[-1])
+        content = self.encoder.preprocess(content)
+        # encode image
+        enc_c, generate_feature = self.encoder.encode(content)
+        with tf.name_scope('feature1CNN'):
+            feature1 = generate_feature['relu3_1']
+            f1t = feature1+0.01*f1t
+        with tf.name_scope('feature2CNN'):
+            feature2 = generate_feature['relu4_1']
+            f2t = feature2+0.01*f2t
+        with tf.name_scope('feature3CNN'):
+            feature3 = generate_feature['relu5_1']
+            f3t = feature3+0.01*f3t
+
+        final_image = self.decoder.decode(f3t, True, f1t, f2t)
+        final_image = self.encoder.deprocess(final_image)
+        final_image = tf.reverse(final_image, axis=[-1])
+
+        # clip to 0..255
+        final_image = tf.clip_by_value(final_image, 0.0, 255.0)
+
+        return final_image
 
     def decoder_output(self, content):
         # switch RGB to BGR

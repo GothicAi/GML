@@ -22,23 +22,87 @@ LEARNING_RATE = 1e-4
 LR_DECAY_RATE = 5e-5
 DECAY_STEPS = 1.0
 
-def testall(content_imgs_path, output_image_path, encoder_path, model_save_path,debug=False):
+def testall(content_imgs_path, output_image_path, encoder_path, pretrained_path_encoder_decoder,pretrained_path_facelet,model_save_path=None):
     # get the test image shape
     HEIGHT, WIDTH, CHANNELS = TRAINING_IMAGE_SHAPE
     INPUT_SHAPE = (1, HEIGHT, WIDTH, CHANNELS)
 
+
+
     # create the graph
     with tf.Graph().as_default(), tf.Session() as sess:
+        source = np.load("beauty_source.npz")['arr_0']
+        target = np.load("beauty_target.npz")['arr_0']
+        deltav = target - source
+        v1 = deltav[0, 0:1 * 64 * 64 * 256].reshape([1, 64, 64, 256])
+        v2 = deltav[0, 1 * 64 * 64 * 256:1 * 64 * 64 * 256 + 32 * 32 * 512].reshape([1, 32, 32, 512])
+        v3 = deltav[0, 1 * 64 * 64 * 256 + 32 * 32 * 512:].reshape([1, 16, 16, 512])
+
+        tv1 = tf.constant(v1)
+        tv2 = tf.constant(v2)
+        tv3 = tf.constant(v3)
         content = tf.placeholder(tf.float32, shape=INPUT_SHAPE, name='photo')
         # create the style transfer net
         stn = EncoderDecoderNet(encoder_path)
         # pass content and style to the stn, getting the generated_img
 
         with tf.name_scope("test_group"):
+            #generated_img=stn.decoder_with_deltaV(content,tv1,tv2,tv3)
             generated_img = stn.decoder_with_facelet(content)
+            #generated_img = stn.decoder_output(content)
+
+        exclusions = ['encoder', '/encoder', 'feature1', '/feature1', 'feature2', '/feature2','feature3', '/feature3']
+        variables_to_restore = []
+        # for var in tf.contrib.framework.get_model_variables():
+        for var in tf.contrib.slim.get_variables_to_restore():
+            excluded = False
+            for exclusion in exclusions:
+                if var.op.name.startswith(exclusion):
+                    excluded = True
+                    break
+            if not excluded:
+                variables_to_restore.append(var)
+            # print(variables_to_restore)
+        saver_ed = tf.train.Saver(variables_to_restore, max_to_keep=20)
+
+        print(pretrained_path_facelet)
+        print(pretrained_path_encoder_decoder)
+        exclusions = ['encoder', '/encoder', 'decoder', '/decoder']
+        variables_to_restore = []
+        # for var in tf.contrib.framework.get_model_variables():
+        for var in tf.contrib.slim.get_variables_to_restore():
+            excluded = False
+            for exclusion in exclusions:
+                if var.op.name.startswith(exclusion):
+                    excluded = True
+                    break
+            if not excluded:
+                variables_to_restore.append(var)
+        # print(variables_to_restore)
+        saver_facelet = tf.train.Saver(variables_to_restore, max_to_keep=20)
+        # all of the variables
+        saver_all = tf.train.Saver(tf.contrib.slim.get_variables_to_restore(), max_to_keep=50)
 
         sess.run(tf.global_variables_initializer())
 
+
+        if model_save_path is not None:
+            print("loading model from checkpoint")
+            checkpoint = tf.train.latest_checkpoint(model_save_path)
+            saver_all.restore(sess, checkpoint)
+        else:
+            print("\n\tLoading pre-trained encoder-decoder model ...")
+            checkpoint_dir = os.path.join(pretrained_path_encoder_decoder)
+            checkpoints = tf.train.get_checkpoint_state(checkpoint_dir)
+            if checkpoints and checkpoints.model_checkpoint_path:
+                checkpoints_name = os.path.basename(checkpoints.model_checkpoint_path)
+                saver_ed.restore(sess, os.path.join(checkpoint_dir, checkpoints_name))
+            print("\n\tLoading pre-trained facelet model ...")
+            checkpoint_dir = os.path.join(pretrained_path_facelet)
+            checkpoints = tf.train.get_checkpoint_state(checkpoint_dir)
+            if checkpoints and checkpoints.model_checkpoint_path:
+                checkpoints_name = os.path.basename(checkpoints.model_checkpoint_path)
+                saver_facelet.restore(sess, os.path.join(checkpoint_dir, checkpoints_name))
 
         all_photo=os.listdir(content_imgs_path)
         outputs=[]
@@ -51,4 +115,4 @@ def testall(content_imgs_path, output_image_path, encoder_path, model_save_path,
         print('all test done...\n')
     save_images(outputs, all_photo, output_image_path)
 
-#testall('source','log',"vgg19_normalised.npz","")
+testall('source','log',"vgg19_normalised.npz","encoder_decoder_model","facelet_model_beauty")
