@@ -4,6 +4,7 @@ import numpy as np
 import os
 import tensorflow as tf
 from encoder_decoder_net import EncoderDecoderNet
+from utils import get_images, save_images
 from utils import get_train_images
 import tensorflow.contrib.eager as tfe
 import os
@@ -40,14 +41,14 @@ def testall(content_imgs_path, output_image_path, encoder_path, model_save_path,
 
 
         all_photo=os.listdir(content_imgs_path)
+        outputs=[]
         print('Now begin to test all model...\n')
         for name in all_photo:
-            photo=cv2.imread(content_imgs_path+"/"+name)
-            photo=np.array([photo])
-            print('run one test step')
-            img = sess.run([generated_img], feed_dict={content: photo})
-            print(len(img))
-            cv2.imwrite(output_image_path+'/'+name,np.array(img))
+            print("now proceeding:"+name)
+            content_img = get_images(content_imgs_path+'/'+name, height=HEIGHT, width=WIDTH)
+            img = sess.run(generated_img, feed_dict={content: content_img})
+            outputs.append(img[0])
         print('all test done...\n')
+    save_images(outputs, all_photo, output_image_path)
 
-testall('source','log',"vgg19_normalised.npz","")
+#testall('source','log',"vgg19_normalised.npz","")
