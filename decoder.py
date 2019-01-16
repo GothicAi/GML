@@ -10,12 +10,12 @@ class Decoder(object):
             
             self.weight_vars.append(self._create_variables(512, 512, 3, scope='conv4_4'))
             self.weight_vars.append(self._create_variables(512, 512, 3, scope='conv4_3'))
-            self.weight_vars.append(self._create_variables(512, 512, 3, scope='conv4_2'))
+            self.weight_vars.append(self._create_variables(512, 512, 3, scope='conv4_2'))#here add feature 2
             self.weight_vars.append(self._create_variables(512, 256, 3, scope='conv4_1'))
 
             self.weight_vars.append(self._create_variables(256, 256, 3, scope='conv3_4'))
             self.weight_vars.append(self._create_variables(256, 256, 3, scope='conv3_3'))
-            self.weight_vars.append(self._create_variables(256, 256, 3, scope='conv3_2'))
+            self.weight_vars.append(self._create_variables(256, 256, 3, scope='conv3_2'))#here add feature 1
             self.weight_vars.append(self._create_variables(256, 128, 3, scope='conv3_1'))
 
             self.weight_vars.append(self._create_variables(128, 128, 3, scope='conv2_2'))
@@ -42,7 +42,7 @@ class Decoder(object):
                                                           is_training=False, fused=True, scope='bn')
             return normalized
 
-    def decode(self, image,using_facelet=False,f1=None,f2=None,f3=None,is_training=False):
+    def decode(self, image,using_facelet=False,f1=None,f2=None,is_training=False):
         # upsampling after 'conv4_1', 'conv3_1', 'conv2_1'
         upsample_indices = (0, 4, 8,10)
         final_layer_idx  = len(self.weight_vars) - 1
@@ -52,12 +52,10 @@ class Decoder(object):
             #print(out.shape)
             kernel, bias = self.weight_vars[i]
             if using_facelet:
-                if i==3:#f1 index
+                if i == 7:  # f1 index
                     out = self._conv2d(out, kernel, bias,is_training) + f1
-                elif i == 4:  # f2 index
+                elif i == 3:  # f2 index
                     out = self._conv2d(out, kernel, bias,is_training) + f2
-                elif i == 5:  # f3 index
-                    out = self._conv2d(out, kernel, bias,is_training) + f3
                 elif i == final_layer_idx:
                     out = self._conv2d(out, kernel, bias,is_training,use_relu=False)
                 else:
