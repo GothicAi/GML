@@ -90,7 +90,7 @@ def train_facelet(content_imgs_path, gt_path, encoder_path,model_save_path):
                 step += 1
                 print(step)
 
-                if step % 1000 == 0:
+                if step % 500 == 0:
                     saver.save(sess, model_save_path[0], global_step=step, write_meta_graph=False)
 
                 print(loss_num)
@@ -116,7 +116,7 @@ def train_facelet(content_imgs_path, gt_path, encoder_path,model_save_path):
         #    print('Error message: %s' % str(ex))
 
         ###### Done Training & Save the model ######
-        saver.save(sess, model_save_path)
+        saver.save(sess, model_save_path[0])
 
 #            saver.save(sess, model_save_path)
 
