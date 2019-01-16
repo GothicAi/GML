@@ -71,7 +71,7 @@ def train_facelet(content_imgs_path, gt_path, encoder_path,model_save_path):
         ###### Start Training ######
         step = 0
         n_batches = int(len(content_imgs_path) / BATCH_SIZE)
-        tf.scalar_summary('loss', loss)
+        tf.summary.scalar('loss', loss)
         summary_writer = tf.summary.FileWriter("log", tf.get_default_graph())
         merged = tf.summary.merge_all()
         #try:
