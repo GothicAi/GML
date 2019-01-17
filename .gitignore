@@ -1,0 +1,26 @@
+
+vgg19_normalised\.npz
+
+新建文件夹 \(2\)/
+
+source/
+
+encoder_decoder_model/
+
+*.jpg
+
+log/
+
+\.idea/
+
+*.pyc
+
+*.zip
+
+facelet_model_beauty/
+
+__pycache__/
+
+outputs/
+
+新建文件夹/
