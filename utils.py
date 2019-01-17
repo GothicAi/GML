@@ -83,5 +83,5 @@ def save_images(datas, contents_path, save_dir, suffix=None):
         content_name = content_path_name.split(sep)[-1]
             
         save_path = join(save_dir, '%s-%s%s' % (content_name, suffix, content_ext))
-        
+
         imsave(save_path, data)

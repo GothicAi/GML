@@ -696,8 +696,8 @@ def create_model(inputs, targets):
         #shape = list(outputs.get_shape())
         #len1 = shape[1]
         #len2 = shape[2]
-	gen_loss_Ledg = tf.reduce_mean(tf.abs(targets_h - outputs_h)) + tf.reduce_mean(tf.abs(targets_w - outputs_w))
-	gen_loss_L1  = tf.reduce_mean(tf.abs(targets - outputs))
+        gen_loss_Ledg = tf.reduce_mean(tf.abs(targets_h - outputs_h)) + tf.reduce_mean(tf.abs(targets_w - outputs_w))
+        gen_loss_L1  = tf.reduce_mean(tf.abs(targets - outputs))
         gen_loss_GAN = tf.reduce_mean(-tf.log(predict_fake + EPS))
         gen_loss_CLA = tf.reduce_mean(tf.abs(outputs_fea-targets_fea)) # L1 loss for feature minimization
         gen_loss = gen_loss_GAN * a.gan_weight + gen_loss_L1 * a.l1_weight + gen_loss_CLA*a.fea_weight + gen_loss_Ledg * a.ledg_weight
@@ -1033,7 +1033,7 @@ def main():
                     fetches["discrim_loss"] = model.discrim_loss
                     fetches["gen_loss_GAN"] = model.gen_loss_GAN
                     fetches["gen_loss_L1"] = model.gen_loss_L1
-		    fetches["gen_loss_Ledg"] = model.gen_loss_Ledg
+                    fetches["gen_loss_Ledg"] = model.gen_loss_Ledg
                     fetches["gen_loss_CLA"] = model.gen_loss_CLA
 
                 if should(a.summary_freq):
@@ -1049,9 +1049,9 @@ def main():
                 fetches["targets_crop"] = model.targets_crop
                 fetches["outputs_fea"]  = model.outputs_fea
                 fetches["targets_fea"] = model.targets_fea
-		fetches["outputs_h"] = model.outputs_h
+                fetches["outputs_h"] = model.outputs_h
                 fetches["targets_h"] = model.targets_h
-		fetches["outputs_w"] = model.outputs_w
+                fetches["outputs_w"] = model.outputs_w
                 fetches["targets_w"] = model.targets_w
                 fetches["cla_tvars"] = model.cla_tvars
                 fetches["global_step"] = model.global_step
@@ -1077,7 +1077,7 @@ def main():
                     print("discrim_loss", results["discrim_loss"])
                     print("gen_loss_GAN", results["gen_loss_GAN"])
                     print("gen_loss_L1", results["gen_loss_L1"])
-		    print("gen_loss_Ledg", results["gen_loss_Ledg"])
+                    print("gen_loss_Ledg", results["gen_loss_Ledg"])
                     print("gen_loss_CLA", results["gen_loss_CLA"])
 
                 if should(a.save_freq):
