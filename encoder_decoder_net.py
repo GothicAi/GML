@@ -25,10 +25,10 @@ class EncoderDecoderNet(object):
         enc_c, generate_feature = self.encoder.encode(content)
         with tf.name_scope('feature1CNN'):
             feature1 = generate_feature['relu3_1']
-            f1t=self.fnet1.combine(feature1,0)
+            f1t=self.fnet1.combine(feature1,0.01)
         with tf.name_scope('feature2CNN'):
             feature2 = generate_feature['relu4_1']
-            f2t=self.fnet2.combine(feature2,0)
+            f2t=self.fnet2.combine(feature2,0.01)
         with tf.name_scope('feature3CNN'):
             feature3 = generate_feature['relu5_1']
             f3t=self.fnet3.combine(feature3,0.01)
@@ -50,13 +50,13 @@ class EncoderDecoderNet(object):
         enc_c, generate_feature = self.encoder.encode(content)
         with tf.name_scope('feature1CNN'):
             feature1 = generate_feature['relu3_1']
-            f1t = feature1+0.01*f1t
+            f1t = feature1 + 0.01*f1t
         with tf.name_scope('feature2CNN'):
             feature2 = generate_feature['relu4_1']
-            f2t = feature2+0.01*f2t
+            f2t = feature2 + 0.01*f2t
         with tf.name_scope('feature3CNN'):
             feature3 = generate_feature['relu5_1']
-            f3t = feature3+0.01*f3t
+            f3t = feature3 + 0.01*f3t
 
         final_image = self.decoder.decode(f3t, True, f1t, f2t)
         final_image = self.encoder.deprocess(final_image)
@@ -70,18 +70,19 @@ class EncoderDecoderNet(object):
     def decoder_output(self, content):
         # switch RGB to BGR
         content = tf.reverse(content, axis=[-1])
-
         # preprocess image
         content = self.encoder.preprocess(content)
-
         # encode image
         enc_c, enc_c_layers = self.encoder.encode(content)
+        f1 = enc_c_layers['relu3_1']
+        f2 = enc_c_layers['relu4_1']
+        f3 = enc_c_layers['relu5_1']
 
         self.encoded_input_layers = enc_c_layers
         self.input_features = enc_c
 
         # decode target features back to image
-        generated_img = self.decoder.decode(enc_c)
+        generated_img = self.decoder.decode(f3, False, f1, f2)
 
         # deprocess image
         generated_img = self.encoder.deprocess(generated_img)

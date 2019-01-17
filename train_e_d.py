@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 from encoder_decoder_net import EncoderDecoderNet
 from utils import get_train_images
-import tensorflow.contrib.eager as tfe
+#import tensorflow.contrib.eager as tfe
 import os
 import random
 #tfe.enable_eager_execution()
@@ -12,39 +12,13 @@ import random
 
 TRAINING_IMAGE_SHAPE = (256, 256, 3) # (height, width, color_channels)
 
-EPOCHS = 20
+EPOCHS = 80
 BATCH_SIZE = 24
 LEARNING_RATE = 1e-4
 LR_DECAY_RATE = 5e-5
 DECAY_STEPS = 1.0
-
-def transform(image):
-    scale_size = 286
-    CROP_SIZE = 256
-
-    r = image
-    seed = random.randint(0, 2**31 - 1)
-    r = tf.image.random_flip_left_right(r, seed=seed)
-
-    # area produces a nice downscaling, but does nearest neighbor for upscaling
-    # assume we're going to be doing downscaling here
-    r = tf.image.resize_images(r, [scale_size, scale_size], method=tf.image.ResizeMethod.AREA)
-
-    offset = tf.cast(tf.floor(tf.random_uniform([2], 0, scale_size - CROP_SIZE + 1, seed=seed)), dtype=tf.int32)
-    if scale_size > CROP_SIZE:
-        r = tf.image.crop_to_bounding_box(r, offset[0], offset[1], CROP_SIZE, CROP_SIZE)
-    elif scale_size < CROP_SIZE:
-        raise Exception("scale size cannot be less than crop size")
-    return r
-
-def data_preprocess(imgname):
-    image_string = tf.read_file(imgname)
-    image_decoded = tf.image.decode_jpeg(image_string)
-    image_resized = tf.image.resize_images(image_decoded, [256, 256])
-    res = transform(image_resized)
-    return res
-
-def train_e_d(content_imgs_path, feature_weight, encoder_path, model_save_path, debug=False, logging_period=100):
+#checkpoint = 'Aug_L1_models'
+def train_e_d(content_imgs_path, feature_weight, encoder_path, model_save_path, checkpoint, debug=False, logging_period=100):
     if debug:
         from datetime import datetime
         start_time = datetime.now()
@@ -66,9 +40,9 @@ def train_e_d(content_imgs_path, feature_weight, encoder_path, model_save_path, 
         input_features = stn.input_features
         generate_features = stn.generate_features
 
-        pixel_loss = tf.reduce_mean(tf.abs(generated_img - content))
+        pixel_loss = tf.reduce_mean(tf.abs(generated_img - content))  # tf.nn.l2_loss(generated_img - content)
 
-        feature_loss = tf.reduce_mena(tf.abs(generate_features - input_features))
+        feature_loss = tf.reduce_mean(tf.abs(generate_features - input_features)) # tf.nn.l2_loss(generate_features - input_features)
 
         # compute the total loss
         loss = pixel_loss + feature_weight * feature_loss
@@ -83,10 +57,20 @@ def train_e_d(content_imgs_path, feature_weight, encoder_path, model_save_path, 
         sess.run(tf.global_variables_initializer())
         # saver
         saver = tf.train.Saver(max_to_keep=20)
+	if checkpoint is not None:
+            print("loading model from checkpoint")
+            checkpoint = tf.train.latest_checkpoint(checkpoint)
+            saver.restore(sess, checkpoint)
 
         ###### Start Training ######
         step = 0
+	content_imgs_path = content_imgs_path[:2400]
+	np.random.shuffle(content_imgs_path)
         n_batches = int(len(content_imgs_path) / BATCH_SIZE)
+	tf.summary.scalar('pixel_loss', pixel_loss)
+	tf.summary.scalar('feature_loss', feature_loss)
+        summary_writer = tf.summary.FileWriter("log", tf.get_default_graph())
+        merged = tf.summary.merge_all()
         
         if debug:
             elapsed_time = datetime.now() - start_time
@@ -97,24 +81,28 @@ def train_e_d(content_imgs_path, feature_weight, encoder_path, model_save_path, 
         #try:
         print('Now begin to train the model...\n')
         for epoch in range(EPOCHS):
-            print(epoch)
-            np.random.shuffle(content_imgs_path)
+            #print(epoch)
+            #np.random.shuffle(content_imgs_path)
             for batch in range(n_batches):
-                print(batch)
+                #print(batch)
                     # retrive a batch of content and style images
                 content_batch_path = content_imgs_path[batch*BATCH_SIZE:(batch*BATCH_SIZE + BATCH_SIZE)]
 
                 content_batch = get_train_images(content_batch_path, crop_height=HEIGHT, crop_width=WIDTH)
-                print('run the training step')
+                #print('run the training step')
                     # run the training step
                 _,loss_log1,loss_log2 = sess.run([train_op,pixel_loss,feature_loss], feed_dict={content: content_batch})
 
                 step += 1
-                print(step)
+                print(epoch, batch, step)
+		print(loss_log1,loss_log2)
+		result = sess.run(merged, feed_dict={content: content_batch})
+                summary_writer.add_summary(result, step)
 
-                if step % 1000 == 0:
-                    saver.save(sess, model_save_path, global_step=step, write_meta_graph=False)
-                print(loss_log1,loss_log2)
+                if step % 100 == 0:
+                    saver.save(sess, model_save_path[0], global_step=step, write_meta_graph=False)
+		    print('saving model')
+                #print(loss_log1,loss_log2)
             '''
             imgnames = tf.constant(content_imgs_path)
             dataset = tf.data.Dataset.from_tensor_slices(imgnames)

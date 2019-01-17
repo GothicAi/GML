@@ -18,7 +18,7 @@ def list_images(directory):
     return images
 
 
-def get_train_images(paths, resize_len=512, crop_height=256, crop_width=256):
+def get_train_images(paths, resize_len=286, crop_height=256, crop_width=256):
     images = []
     for path in paths:
         image = imread(path, mode='RGB')
@@ -31,7 +31,7 @@ def get_train_images(paths, resize_len=512, crop_height=256, crop_width=256):
             new_width  = resize_len
             new_height = int(height * new_width / width)
 
-        image = imresize(image, [new_height, new_width], interp='nearest')
+        image = imresize(image, [new_height, new_width], interp='bilinear')
 
         # crop the image
         start_h = np.random.choice(new_height - crop_height + 1)

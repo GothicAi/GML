@@ -6,20 +6,19 @@ from infer import stylize
 #import tensorflow.contrib.eager as tfe
 
 #tfe.enable_eager_execution()
-
 is_training = True
 
 # for training
-TRAINING_CONTENT_DIR = 'source'
+TRAINING_CONTENT_DIR = 'data'
 ENCODER_WEIGHTS_PATH = 'vgg19_normalised.npz'
 LOGGING_PERIOD = 20
-feature_weight = 1
+feature_weight = 50
 MODEL_SAVE_PATHS = [
-    'models/style_weight_2e0.ckpt',
+    'Aug_L1_concat_models/encoder_decoder_concat_model.ckpt',
 ]
-
+#checkpoint = 'Aug_L1_concat_models'
 # for inferring (stylize)
-INFERRING_CONTENT_DIR = 'source'
+INFERRING_CONTENT_DIR = 'data2'
 OUTPUTS_DIR = 'outputs'
 
 
@@ -29,7 +28,7 @@ def main():
 
         content_imgs_path = list_images(TRAINING_CONTENT_DIR)
 
-        train_e_d(content_imgs_path, feature_weight, ENCODER_WEIGHTS_PATH, MODEL_SAVE_PATHS, logging_period=LOGGING_PERIOD, debug=False)
+        train_e_d(content_imgs_path, feature_weight, ENCODER_WEIGHTS_PATH, MODEL_SAVE_PATHS, checkpoint=None, logging_period=LOGGING_PERIOD, debug=False)
 
         print('\n>>> Successfully! Done all training...\n')
 
@@ -37,7 +36,7 @@ def main():
 
         content_imgs_path = list_images(INFERRING_CONTENT_DIR)
 
-        stylize(content_imgs_path, OUTPUTS_DIR, ENCODER_WEIGHTS_PATH, MODEL_SAVE_PATHS[0], suffix=None)
+        stylize(content_imgs_path, OUTPUTS_DIR, ENCODER_WEIGHTS_PATH, MODEL_SAVE_PATHS, suffix=None)
 
         print('\n>>> Successfully! Done all stylizing...\n')
 

@@ -11,12 +11,12 @@ class Decoder(object):
             self.weight_vars.append(self._create_variables(512, 512, 3, scope='conv4_4'))
             self.weight_vars.append(self._create_variables(512, 512, 3, scope='conv4_3'))
             self.weight_vars.append(self._create_variables(512, 512, 3, scope='conv4_2'))#here add feature 2
-            self.weight_vars.append(self._create_variables(512, 256, 3, scope='conv4_1'))
+            self.weight_vars.append(self._create_variables(1024, 256, 3, scope='conv4_1'))
 
             self.weight_vars.append(self._create_variables(256, 256, 3, scope='conv3_4'))
             self.weight_vars.append(self._create_variables(256, 256, 3, scope='conv3_3'))
             self.weight_vars.append(self._create_variables(256, 256, 3, scope='conv3_2'))#here add feature 1
-            self.weight_vars.append(self._create_variables(256, 128, 3, scope='conv3_1'))
+            self.weight_vars.append(self._create_variables(512, 128, 3, scope='conv3_1'))
 
             self.weight_vars.append(self._create_variables(128, 128, 3, scope='conv2_2'))
             self.weight_vars.append(self._create_variables(128,  64, 3, scope='conv2_1'))
@@ -53,16 +53,20 @@ class Decoder(object):
             kernel, bias = self.weight_vars[i]
             if using_facelet:
                 if i == 7:  # f1 index
-                    out = self._conv2d(out, kernel, bias,is_training) + f1
+                    out = tf.concat([self._conv2d(out, kernel, bias,is_training), f1], axis=3)
                 elif i == 3:  # f2 index
-                    out = self._conv2d(out, kernel, bias,is_training) + f2
+                    out = tf.concat([self._conv2d(out, kernel, bias,is_training), f2], axis=3)
                 elif i == final_layer_idx:
                     out = self._conv2d(out, kernel, bias,is_training,use_relu=False)
                 else:
                     out = self._conv2d(out, kernel, bias,is_training)
             else:
-                if i == final_layer_idx:
-                    out = self._conv2d(out, kernel, bias,is_training, use_relu=False)
+                if i == 7:  # f1 index
+                    out = tf.concat([self._conv2d(out, kernel, bias,is_training), f1], axis=3)
+                elif i == 3:  # f2 index
+                    out = tf.concat([self._conv2d(out, kernel, bias,is_training), f2], axis=3)
+                elif i == final_layer_idx:
+                    out = self._conv2d(out, kernel, bias,is_training,use_relu=False)
                 else:
                     out = self._conv2d(out, kernel, bias,is_training)
             
